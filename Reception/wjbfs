@@ -1,0 +1,81 @@
+from collections import deque
+
+def water_jug_problem(cap1, cap2, goal1, goal2):
+    # Create a set to store visited states
+    visited = set()
+    
+    # Create a queue to store (state, path) tuples
+    queue = deque([((0, 0), [])])
+    
+    # Possible actions
+    def get_actions(state):
+        jug1, jug2 = state
+        actions = []
+        
+        # Fill jug1
+        if jug1 < cap1:
+            actions.append(((cap1, jug2), f"Fill Jug1 to {cap1}"))
+        
+        # Fill jug2
+        if jug2 < cap2:
+            actions.append(((jug1, cap2), f"Fill Jug2 to {cap2}"))
+        
+        # Empty jug1
+        if jug1 > 0:
+            actions.append(((0, jug2), "Empty Jug1"))
+        
+        # Empty jug2
+        if jug2 > 0:
+            actions.append(((jug1, 0), "Empty Jug2"))
+        
+        # Pour jug1 into jug2
+        transfer = min(jug1, cap2 - jug2)
+        if transfer > 0:
+            actions.append(((jug1 - transfer, jug2 + transfer), f"Pour {transfer} from Jug1 to Jug2"))
+        
+        # Pour jug2 into jug1
+        transfer = min(jug2, cap1 - jug1)
+        if transfer > 0:
+            actions.append(((jug1 + transfer, jug2 - transfer), f"Pour {transfer} from Jug2 to Jug1"))
+        
+        return actions
+    
+    # BFS algorithm
+    while queue:
+        (jug1, jug2), path = queue.popleft()
+        
+        # Check if we reached the goal
+        if (jug1 == goal1) and (jug2 == goal2):
+            return path + [(f"Goal state reached: ({jug1}, {jug2})", (jug1, jug2))]
+        
+        # Mark the current state as visited
+        if (jug1, jug2) not in visited:
+            visited.add((jug1, jug2))
+            
+            # Get possible actions from the current state
+            for new_state, action in get_actions((jug1, jug2)):
+                queue.append((new_state, path + [(action, new_state)]))
+    
+    # No solution found
+    return None
+
+def main():
+    # Get inputs from the user
+    cap1 = int(input("Enter the capacity of Jug1: "))
+    cap2 = int(input("Enter the capacity of Jug2: "))
+    goal1 = int(input("Enter the goal amount for Jug1: "))
+    goal2 = int(input("Enter the goal amount for Jug2: "))
+
+    # Solve the Water Jug problem
+    solution = water_jug_problem(cap1, cap2, goal1, goal2)
+
+    # Output the solution
+    if solution:
+        print("Solution found:")
+        for i, (step, (jug1, jug2)) in enumerate(solution):
+            print(f"Step {i+1}: {step}, Jugs state: ({jug1}, {jug2})")
+    else:
+        print("No solution found.")
+
+if __name__ == "__main__":
+    main()
